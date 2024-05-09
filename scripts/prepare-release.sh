@@ -48,7 +48,7 @@ update_latest_version() {
     set_config_arg "${image_arg_prefix:?}_TAG" "${ver:?}"
 }
 
-pkg="Python Base"
+pkg="Python"
 tag_pkg="python"
 rel_ver="${1:?}"
 pkg_ver="${2:?}"
