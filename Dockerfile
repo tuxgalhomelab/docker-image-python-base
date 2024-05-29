@@ -14,10 +14,10 @@ RUN \
     # Install dependencies. \
     && homelab install ${PACKAGES_TO_INSTALL:?} \
     && homelab install-tar-dist \
-        https://github.com/pyenv/pyenv/archive/refs/tags/v${PYENV_VERSION:?}.tar.gz \
+        https://github.com/pyenv/pyenv/archive/refs/tags/${PYENV_VERSION:?}.tar.gz \
         ${PYENV_SHA256_CHECKSUM:?} \
         pyenv \
-        pyenv-${PYENV_VERSION:?} \
+        pyenv-${PYENV_VERSION#"v"} \
         root \
         root \
     && pushd /opt/pyenv \
