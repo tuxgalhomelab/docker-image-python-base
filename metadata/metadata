@@ -4,6 +4,10 @@ set -e -o pipefail
 # Add repo specific metadata here.
 
 PACKAGE_NAME="pyenv"
+RELEASE_PACKAGE_NAME="Python"
+RELEASE_PACKAGE_VERSION_CONFIG_KEY="IMAGE_PYTHON_VERSION"
+RELEASE_TAG_PACKAGE_NAME="python"
+RELEASE_USE_CUSTOM_RELEASE_VERSION="y"
 UPSTREAM_IMAGE_CONFIG_KEY_PREFIX="BASE_IMAGE"
 UPSTREAM_VERSION_CONFIG_KEY="PYENV_VERSION"
 UPSTREAM_CHECKSUM_CONFIG_KEY="PYENV_SHA256_CHECKSUM"
@@ -28,6 +32,14 @@ update_latest_upstream_version() {
     set_config_arg "${UPSTREAM_VERSION_CONFIG_KEY:?}" "${latest_ver:?}"
     set_config_arg "${UPSTREAM_CHECKSUM_CONFIG_KEY:?}" "${sha256_checksum:?}"
     git add ${ARGS_FILE:?}
+}
+
+custom_release_version() {
+    echo -n "v$(latest_base_image_tag)"
+}
+
+package_current_release_version() {
+    get_config_arg "${RELEASE_PACKAGE_VERSION_CONFIG_KEY:?}"
 }
 
 test_start_container() {
