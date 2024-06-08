@@ -30,7 +30,10 @@ ENV PATH="${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:${PATH}"
 
 RUN \
     eval "$(pyenv init -)" \
-    && pyenv install ${IMAGE_PYTHON_VERSION:?} \
+    && PYTHON_CONFIGURE_OPTS="--enable-optimizations --with-lto" \
+        PYTHON_CFLAGS="-march=native -mtune=native" \
+        PROFILE_TASK="-m test.regrtest --pgo -j0" \
+        pyenv install ${IMAGE_PYTHON_VERSION:?} \
     && pyenv global ${IMAGE_PYTHON_VERSION:?} \
     # Clean up. \
     && homelab cleanup
