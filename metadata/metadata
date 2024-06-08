@@ -5,10 +5,11 @@ set -e -o pipefail
 
 BASE_IMAGE_CONFIG_KEY_PREFIX="BASE_IMAGE"
 
-UPSTREAM_PACKAGE_NAME="pyenv"
-UPSTREAM_VERSION_CONFIG_KEY="PYENV_VERSION"
-UPSTREAM_CHECKSUM_CONFIG_KEY="PYENV_SHA256_CHECKSUM"
-UPSTREAM_GIT_REPO="https://github.com/pyenv/pyenv"
+UPSTREAM_PACKAGE_NAME="pyenv/Python"
+UPSTREAM_PYENV_VERSION_CONFIG_KEY="PYENV_VERSION"
+UPSTREAM_PYTHON_VERSION_CONFIG_KEY="IMAGE_PYTHON_VERSION"
+UPSTREAM_PYENV_CHECKSUM_CONFIG_KEY="PYENV_SHA256_CHECKSUM"
+UPSTREAM_PYENV_GIT_REPO="https://github.com/pyenv/pyenv"
 
 RELEASE_PACKAGE_NAME="Python"
 RELEASE_PACKAGE_VERSION_CONFIG_KEY="IMAGE_PYTHON_VERSION"
@@ -19,21 +20,58 @@ TEST_TYPE="background"
 TEST_CONTAINER_TYPE="python-base"
 TEST_CONTAINER_START_WAIT_SECONDS="10"
 
+current_pyenv_version() {
+    get_config_arg ${UPSTREAM_PYENV_VERSION_CONFIG_KEY:?}
+}
+
+latest_pyenv_version() {
+    git_remote_repo_latest_tag "${UPSTREAM_PYENV_GIT_REPO:?}.git"
+}
+
+current_python_version() {
+    get_config_arg ${UPSTREAM_PYTHON_VERSION_CONFIG_KEY:?}
+}
+
+latest_python_version() {
+    local pyenv_ver="${1:?}"
+    local checkout_dir="$(mktemp -d)"
+    pushd ${checkout_dir:?} >/dev/null 2>&1
+    git clone --no-checkout --depth 1 --branch ${pyenv_ver:?} ${UPSTREAM_PYENV_GIT_REPO:?}.git pyenv >/dev/null 2>&1
+    pushd pyenv >/dev/null 2>&1
+    git ls-tree --full-name --name-only -r ${pyenv_ver:?}:plugins/python-build/share/python-build/ | \
+        grep -P '^3\.\d+\.\d+$' | \
+        sort --version-sort --reverse | \
+        head -1
+    popd >/dev/null 2>&1
+    popd >/dev/null 2>&1
+    rm -rf "${checkout_dir:?}"
+}
+
 current_upstream_version() {
-    get_config_arg ${UPSTREAM_VERSION_CONFIG_KEY:?}
+    local pyenv_ver="$(current_pyenv_version)"
+    local python_ver="$(current_python_version)"
+    echo "${pyenv_ver:?}/${python_ver:?}"
 }
 
 latest_upstream_version() {
-    git_remote_repo_latest_tag "${UPSTREAM_GIT_REPO:?}.git"
+    local pyenv_ver="$(latest_pyenv_version)"
+    local python_ver="$(latest_python_version ${pyenv_ver:?})"
+    echo "${pyenv_ver:?}/${python_ver:?}"
 }
 
 update_latest_upstream_version() {
     local cur_ver="${1:?}"
     local latest_ver="${2:?}"
-    local sha256_checksum="$(upstream_github_repo_archive_sha256_checksum ${latest_ver:?})"
-    echo "Updating ${PACKAGE_NAME:?} ${UPSTREAM_VERSION_CONFIG_KEY:?} '${cur_ver:?}' -> '${latest_ver:?}'"
-    set_config_arg "${UPSTREAM_VERSION_CONFIG_KEY:?}" "${latest_ver:?}"
-    set_config_arg "${UPSTREAM_CHECKSUM_CONFIG_KEY:?}" "${sha256_checksum:?}"
+    local cur_pyenv_ver="$(echo "${cur_ver:?}" | cut -d '/' -f 1)"
+    local cur_python_ver="$(echo "${cur_ver:?}" | cut -d '/' -f 2)"
+    local latest_pyenv_ver="$(echo "${latest_ver:?}" | cut -d '/' -f 1)"
+    local latest_python_ver="$(echo "${latest_ver:?}" | cut -d '/' -f 2)"
+    local latest_pyenv_sha256_checksum="$(github_repo_archive_sha256_checksum ${UPSTREAM_PYENV_GIT_REPO:?} ${latest_pyenv_ver:?})"
+
+    echo "Updating ${UPSTREAM_PACKAGE_NAME:?} ${UPSTREAM_PYENV_VERSION_CONFIG_KEY:?}/${UPSTREAM_PYTHON_VERSION_CONFIG_KEY:?} '${cur_ver:?}' -> '${latest_ver:?}'"
+    set_config_arg "${UPSTREAM_PYENV_VERSION_CONFIG_KEY:?}" "${latest_pyenv_ver:?}"
+    set_config_arg "${UPSTREAM_PYENV_CHECKSUM_CONFIG_KEY:?}" "${latest_pyenv_sha256_checksum:?}"
+    set_config_arg "${UPSTREAM_PYTHON_VERSION_CONFIG_KEY:?}" "${latest_python_ver:?}"
     git add ${ARGS_FILE:?}
 }
 
