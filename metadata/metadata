@@ -25,7 +25,7 @@ current_pyenv_version() {
 }
 
 latest_pyenv_version() {
-    git_remote_repo_latest_tag "${UPSTREAM_PYENV_GIT_REPO:?}.git"
+    git_remote_repo_latest_tag "${UPSTREAM_PYENV_GIT_REPO:?}"
 }
 
 current_python_version() {
@@ -36,7 +36,7 @@ latest_python_version() {
     local pyenv_ver="${1:?}"
     local checkout_dir="$(mktemp -d)"
     pushd ${checkout_dir:?} >/dev/null 2>&1
-    git clone --no-checkout --depth 1 --branch ${pyenv_ver:?} ${UPSTREAM_PYENV_GIT_REPO:?}.git pyenv >/dev/null 2>&1
+    git clone --no-checkout --depth 1 --branch ${pyenv_ver:?} ${UPSTREAM_PYENV_GIT_REPO:?} pyenv >/dev/null 2>&1
     pushd pyenv >/dev/null 2>&1
     git ls-tree --full-name --name-only -r ${pyenv_ver:?}:plugins/python-build/share/python-build/ | \
         grep -P '^3\.\d+\.\d+$' | \
