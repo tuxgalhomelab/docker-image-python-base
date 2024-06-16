@@ -10,7 +10,7 @@ ARG IMAGE_PYTHON_VERSION
 ARG PACKAGES_TO_INSTALL
 
 RUN \
-    set -e -o pipefail \
+    set -E -e -o pipefail \
     # Install dependencies. \
     && homelab install ${PACKAGES_TO_INSTALL:?} \
     && homelab install-tar-dist \
