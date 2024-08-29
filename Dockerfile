@@ -9,6 +9,7 @@ ARG PYENV_SHA256_CHECKSUM
 ARG IMAGE_PYTHON_VERSION
 ARG PACKAGES_TO_INSTALL
 
+# hadolint ignore=SC3040
 RUN \
     set -E -e -o pipefail \
     && export HOMELAB_VERBOSE=y \
