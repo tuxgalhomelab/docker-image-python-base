@@ -16,22 +16,10 @@ RUN \
     # Install dependencies. \
     && homelab install ${PACKAGES_TO_INSTALL:?} \
     # Install python. \
-    && homelab install-tar-dist \
-        https://github.com/pyenv/pyenv/archive/refs/tags/${PYENV_VERSION:?}.tar.gz \
+    && homelab install-python-without-deps \
+        ${PYENV_VERSION:?} \
         ${PYENV_SHA256_CHECKSUM:?} \
-        pyenv \
-        pyenv-${PYENV_VERSION#"v"} \
-        root \
-        root \
-    && pushd /opt/pyenv \
-    && src/configure \
-    && make -C src \
-    && popd \
-    && export PYENV_ROOT="/opt/pyenv" \
-    && export PATH="/opt/pyenv/shims:/opt/pyenv/bin:${PATH}" \
-    && eval "$(pyenv init -)" \
-    && pyenv install ${IMAGE_PYTHON_VERSION:?} \
-    && pyenv global ${IMAGE_PYTHON_VERSION:?} \
+        ${IMAGE_PYTHON_VERSION:?} \
     # Clean up. \
     && homelab cleanup
 
