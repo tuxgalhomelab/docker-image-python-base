@@ -1,7 +1,7 @@
 build-essential=12.9
 libbz2-dev=1.0.8-5+b1
 libffi-dev=3.4.4-1
-liblzma-dev=5.4.1-0.2
+liblzma-dev=5.4.1-1
 libncurses5-dev=6.4-4
 libreadline-dev=8.2-1.3
 libsqlite3-dev=3.40.1-2+deb12u1
