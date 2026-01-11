@@ -39,7 +39,7 @@ latest_python_version() {
     git clone --no-checkout --depth 1 --branch ${pyenv_ver:?} ${UPSTREAM_PYENV_GIT_REPO:?} pyenv >/dev/null 2>&1
     pushd pyenv >/dev/null 2>&1
     git ls-tree --full-name --name-only -r ${pyenv_ver:?}:plugins/python-build/share/python-build/ | \
-        grep -P '^3\.13\.\d+$' | \
+        grep -P '^3\.14\.\d+$' | \
         sort --version-sort --reverse | \
         head -1
     popd >/dev/null 2>&1
